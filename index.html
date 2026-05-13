@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Starlight Idle — Energy Ascension</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app" class="app" data-tier="1">
+    <!-- Floating +Energy numbers container -->
+    <div id="float-layer" class="float-layer" aria-hidden="true"></div>
+
+    <!-- Offline summary -->
+    <dialog id="offline-modal" class="modal">
+      <div class="modal__card">
+        <h2 class="modal__title">While you were away</h2>
+        <p id="offline-summary" class="modal__text"></p>
+        <button type="button" class="btn btn--primary" id="offline-dismiss">Continue</button>
+      </div>
+    </dialog>
+
+    <header class="top-bar">
+      <div class="brand">
+        <span class="brand__icon" aria-hidden="true">✡</span>
+        <div>
+          <div class="brand__name">Starlight Idle</div>
+          <div class="brand__tag">Order × Ascension × Time</div>
+        </div>
+      </div>
+      <div class="resource-block">
+        <div class="resource-block__label">Energy</div>
+        <div id="energy-display" class="resource-block__value">0</div>
+        <div class="resource-block__sub">
+          <span id="eps-display">+0 /s</span>
+          <span class="sep">·</span>
+          <span id="epc-display">+0 /click</span>
+        </div>
+        <div id="momentum-line" class="resource-block__mom" hidden></div>
+      </div>
+      <div class="meta-block">
+        <div class="meta-pill" title="Prestige currency from Ascending">
+          <span class="meta-pill__label">Essence</span>
+          <span id="essence-display" class="meta-pill__value">0</span>
+        </div>
+        <div class="meta-pill">
+          <span class="meta-pill__label">Order</span>
+          <span id="order-display" class="meta-pill__value">I</span>
+        </div>
+      </div>
+    </header>
+
+    <nav class="tab-bar" id="tab-bar" role="tablist" aria-label="Main sections">
+      <button type="button" class="tab tab--active" data-tab="star" role="tab" aria-selected="true">Star</button>
+      <button type="button" class="tab" data-tab="shop" role="tab">Shop</button>
+      <button type="button" class="tab is-locked" data-tab="order" role="tab" aria-disabled="true" data-unlock-energy="1000">Order</button>
+      <button type="button" class="tab is-locked" data-tab="ascend" role="tab" data-unlock-energy="50000">Ascend</button>
+      <button type="button" class="tab is-locked" data-tab="meta" role="tab" data-unlock-ascensions="1">Essence</button>
+      <button type="button" class="tab" data-tab="stats" role="tab">Stats</button>
+      <button type="button" class="tab is-locked" data-tab="achievements" role="tab" data-unlock-total-energy="10000">Achievements</button>
+    </nav>
+
+    <main class="main">
+      <!-- STAR TAB -->
+      <section id="panel-star" class="panel panel--active" data-panel="star" role="tabpanel">
+        <div class="star-stage">
+          <div class="star-stage__glow" id="star-glow"></div>
+          <button type="button" id="star-btn" class="star-btn" aria-label="Gather energy — Star of David">
+            <svg class="star-btn__svg" viewBox="0 0 200 200" aria-hidden="true">
+              <!-- Six-pointed star: two equilateral triangles -->
+              <defs>
+                <linearGradient id="starGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="var(--star-top)" />
+                  <stop offset="100%" stop-color="var(--star-bottom)" />
+                </linearGradient>
+                <filter id="starSoftGlow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="4" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+              <g filter="url(#starSoftGlow)">
+                <polygon class="star-tri" points="100,20 164,130 36,130" fill="url(#starGrad)" />
+                <polygon class="star-tri star-tri--flip" points="100,180 36,70 164,70" fill="url(#starGrad)" opacity="0.92" />
+              </g>
+            </svg>
+          </button>
+          <div class="star-hint">Click the star to gather Energy. Passive income ticks every moment.</div>
+          <div class="bars">
+            <div class="bar">
+              <div class="bar__label">Next Order milestone</div>
+              <div class="bar__track">
+                <div class="bar__fill" id="order-progress-fill"></div>
+              </div>
+              <div class="bar__cap" id="order-progress-text">—</div>
+            </div>
+            <div class="bar">
+              <div class="bar__label">Ascension readiness (this run)</div>
+              <div class="bar__track">
+                <div class="bar__fill bar__fill--ascend" id="ascend-preview-fill"></div>
+              </div>
+              <div class="bar__cap" id="ascend-preview-text">—</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SHOP TAB -->
+      <section id="panel-shop" class="panel" data-panel="shop" role="tabpanel" hidden>
+        <div class="panel__head">
+          <h2>Upgrades</h2>
+          <p class="panel__sub">Costs scale exponentially. Higher Order unlocks stronger rows.</p>
+        </div>
+        <div id="shop-basic" class="upgrade-grid"></div>
+        <div class="panel__head panel__head--spaced">
+          <h2>Advanced</h2>
+          <p class="panel__sub">Global power, automations — unlock with Order level.</p>
+        </div>
+        <div id="shop-advanced" class="upgrade-grid"></div>
+      </section>
+
+      <!-- ORDER TAB -->
+      <section id="panel-order" class="panel" data-panel="order" role="tabpanel" hidden>
+        <div class="panel__head">
+          <h2>Order Levels</h2>
+          <p class="panel__sub">Each Order raises baseline multipliers but makes the next tier slower. Visual theme updates per tier.</p>
+        </div>
+        <div class="order-card">
+          <div class="order-card__row">
+            <span>Current Order</span>
+            <strong id="order-detail-tier">I</strong>
+          </div>
+          <div class="order-card__row">
+            <span>Tier multiplier (clicks &amp; passive)</span>
+            <strong id="order-detail-mult">×1.00</strong>
+          </div>
+          <div class="order-card__row">
+            <span>Next tier requirement</span>
+            <strong id="order-detail-req">—</strong>
+          </div>
+          <button type="button" class="btn btn--accent" id="order-advance-btn">Advance Order (costs Energy)</button>
+          <p class="fineprint" id="order-advance-hint"></p>
+        </div>
+      </section>
+
+      <!-- ASCEND TAB -->
+      <section id="panel-ascend" class="panel" data-panel="ascend" role="tabpanel" hidden>
+        <div class="panel__head">
+          <h2>Ascension</h2>
+          <p class="panel__sub">
+            Ascend to reset your run and bank Essence. The Energy floor for Ascending rises with each completion — there’s always a next hill to climb.
+          </p>
+        </div>
+        <div class="ascend-card">
+          <p id="ascend-gain-text" class="ascend-card__gain">You would gain <strong>0</strong> Essence.</p>
+          <ul class="ascend-list">
+            <li>Resets Energy, Order level, and all Energy-purchased upgrades.</li>
+            <li>Keeps Essence, Essence shop levels, achievements, and lifetime stats.</li>
+            <li>New runs open with a burst of “momentum” production — ideal for active play sessions.</li>
+            <li>Essence scales with current Energy, Order, and total lifetime Energy — no hard completion state.</li>
+          </ul>
+          <button type="button" class="btn btn--danger" id="ascend-btn" disabled>Ascend</button>
+          <p id="ascend-block-reason" class="fineprint"></p>
+        </div>
+      </section>
+
+      <!-- ESSENCE / META TAB -->
+      <section id="panel-meta" class="panel" data-panel="meta" role="tabpanel" hidden>
+        <div class="panel__head">
+          <h2>Essence Upgrades</h2>
+          <p class="panel__sub">Permanent power — costs Essence from Ascension. New rows unlock as you Ascend more.</p>
+        </div>
+        <div id="shop-meta" class="upgrade-grid"></div>
+      </section>
+
+      <!-- STATS TAB -->
+      <section id="panel-stats" class="panel" data-panel="stats" role="tabpanel" hidden>
+        <div class="panel__head">
+          <h2>Statistics</h2>
+        </div>
+        <div class="stats-grid" id="stats-grid"></div>
+      </section>
+
+      <!-- ACHIEVEMENTS -->
+      <section id="panel-achievements" class="panel" data-panel="achievements" role="tabpanel" hidden>
+        <div class="panel__head">
+          <h2>Achievements</h2>
+          <p class="panel__sub">Milestone rewards are informational; the real reward is progression knowledge.</p>
+        </div>
+        <div id="achievements-list" class="achievements-list"></div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span id="save-indicator" class="save-dot" title="Save status"></span>
+      <span class="footer__text">Autosave · local · offline earnings (capped)</span>
+      <button type="button" class="linkish" id="wipe-save">Wipe save</button>
+    </footer>
+  </div>
+
+  <script src="game.js" defer></script>
+</body>
+</html>
