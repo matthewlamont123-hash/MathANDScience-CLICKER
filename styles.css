@@ -409,6 +409,53 @@ body {
   line-height: 1.5;
 }
 
+/* Order Auto-Clicker (Star tab) */
+
+.auto-clicker {
+  width: min(520px, 100%);
+  margin-top: 4px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+}
+
+.auto-clicker__pane.auto-clicker__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.auto-clicker__title {
+  display: block;
+  font-size: 14px;
+  letter-spacing: 0.03em;
+  margin-bottom: 4px;
+}
+
+.auto-clicker__muted {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.auto-clicker__status {
+  margin: 0;
+  flex: 1;
+  min-width: 160px;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.auto-clicker__toggle.auto-clicker__toggle--on {
+  background: rgba(92, 225, 163, 0.18);
+  border-color: color-mix(in srgb, var(--ok) 45%, transparent);
+  color: var(--ok);
+}
+
 /* -------- Progress bars -------- */
 
 .bars {
