@@ -66,28 +66,16 @@
         <div class="star-stage">
           <div class="star-stage__glow" id="star-glow"></div>
           <button type="button" id="star-btn" class="star-btn" aria-label="Gather Starlight">
-            <svg class="star-btn__svg" viewBox="0 0 200 200" aria-hidden="true">
-              <!-- Six-pointed star: two equilateral triangles -->
-              <defs>
-                <linearGradient id="starGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="var(--star-top)" />
-                  <stop offset="100%" stop-color="var(--star-bottom)" />
-                </linearGradient>
-                <filter id="starSoftGlow" x="-50%" y="-50%" width="200%" height="200%">
-                  <feGaussianBlur stdDeviation="4" result="blur" />
-                  <feMerge>
-                    <feMergeNode in="blur" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
-              </defs>
-              <g filter="url(#starSoftGlow)">
-                <polygon class="star-tri" points="100,20 164,130 36,130" fill="url(#starGrad)" />
-                <polygon class="star-tri star-tri--flip" points="100,180 36,70 164,70" fill="url(#starGrad)" opacity="0.92" />
-              </g>
-            </svg>
+            <img
+              class="star-btn__photo"
+              src="assets/clicker.png"
+              alt=""
+              width="280"
+              height="280"
+              decoding="async"
+            />
           </button>
-          <div class="star-hint">Tap the star for Starlight — passive Starlight fills in the background.</div>
+          <div class="star-hint">Tap the portrait for Starlight — passive Starlight fills in the background.</div>
           <aside
             id="xv-auto-teaser"
             class="xv-blob"
