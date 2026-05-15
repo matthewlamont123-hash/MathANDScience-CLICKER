@@ -854,7 +854,6 @@ function renderTopBar() {
   if (estr !== lastUiEnergyStr) {
     ed.textContent = estr;
     lastUiEnergyStr = estr;
-    shopDirty = true;
   }
   epsd.textContent = `+${formatSci(energyPerSecond(), 2)} /s`;
   epc.textContent = `+${formatSci(energyPerClick(), 2)} /click`;
@@ -886,6 +885,7 @@ function renderShop() {
   for (const id of Object.keys(UPGRADES)) {
     const def = UPGRADES[id];
     const wrap = document.createElement("div");
+    wrap.dataset.upgradeId = id;
     wrap.className = "upgrade-card";
     if (state.order < def.tierReq) {
       wrap.classList.add("is-locked");
@@ -918,6 +918,38 @@ function renderShop() {
     });
     wrap.append(title, desc, meta, btn);
     (def.type === "basic" ? basic : adv).appendChild(wrap);
+  }
+}
+
+/** Lightweight sync — avoids full DOM rebuild while Energy ticks (fixes shop flicker). */
+function refreshEnergyShopCards() {
+  const panelShop = document.getElementById("panel-shop");
+  if (panelShop?.hidden) return;
+
+  const basic = document.getElementById("shop-basic");
+  const adv = document.getElementById("shop-advanced");
+  if (!basic || !adv) return;
+  if (basic.childElementCount === 0 && adv.childElementCount === 0) return;
+
+  for (const grid of [basic, adv]) {
+    for (const wrap of grid.children) {
+      const id = wrap.dataset.upgradeId;
+      const def = id && UPGRADES[id];
+      if (!def) continue;
+
+      const tierOk = state.order >= def.tierReq;
+      const afford = canAffordUpgrade(id);
+      wrap.classList.toggle("is-locked", !tierOk);
+      wrap.classList.toggle("is-disabled", !afford);
+      const btn = wrap.querySelector("button.btn--buy");
+      if (btn) btn.disabled = !tierOk || !afford;
+      const meta = wrap.querySelector(".upgrade-card__meta");
+      if (meta) {
+        meta.textContent = !tierOk
+          ? `Unlock at Order ${orderRoman(def.tierReq)}`
+          : `Cost: ${formatSci(upgradeCostFixed(id), 2)}`;
+      }
+    }
   }
 }
 
@@ -1169,6 +1201,7 @@ function frame(now) {
       renderMetaShop();
       shopDirty = false;
     }
+    refreshEnergyShopCards();
     if (achDirty) {
       renderAchievements();
       achDirty = false;
