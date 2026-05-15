@@ -251,7 +251,7 @@ const MIN_SAVE_VERSION = 3;
 
 /** Unlock purchase once lifetime highest Order reaches this tier */
 const AUTO_CLICKER_ORDER_REQUIREMENT = 15;
-/** One pulse per interval = one manual click worth of Energy */
+/** One pulse per interval = one manual tap worth of Starlight */
 const AUTO_CLICKER_INTERVAL_MS = 1000;
 /** One-time purchase cost */
 const AUTO_CLICKER_COST = SciNum.fromNumber(5e17);
@@ -295,7 +295,7 @@ function getNewRunMomentum() {
 }
 
 /**
- * Ascension Energy floor rises with completions so prestige never becomes trivial,
+ * Ascension Starlight floor rises with completions so prestige never becomes trivial,
  * but the first runs stay snappy (starts near 1e6).
  */
 function getAscendRequirement() {
@@ -321,8 +321,8 @@ function getAscendRequirement() {
 const UPGRADES = {
   click_power: {
     id: "click_power",
-    name: "Focus Training",
-    desc: "Sharpen each click — strong first 25 levels, steady after (two-phase scaling).",
+    name: "Star Grip",
+    desc: "Raises Starlight from every tap on the star.",
     baseCost: SciNum.fromNumber(12),
     growth: 1.125,
     tierReq: 1,
@@ -331,8 +331,8 @@ const UPGRADES = {
   },
   passive_base: {
     id: "passive_base",
-    name: "Radiant Collector",
-    desc: "Passive lattice: generous early /s, soft-capped at extreme levels.",
+    name: "Lattice Well",
+    desc: "Adds passive Starlight each second before other multipliers.",
     baseCost: SciNum.fromNumber(18),
     growth: 1.118,
     tierReq: 1,
@@ -341,8 +341,8 @@ const UPGRADES = {
   },
   passive_pct: {
     id: "passive_pct",
-    name: "Harmonic Resonance",
-    desc: "+11% passive / level (early), slightly softer past level 40.",
+    name: "Resonance Weave",
+    desc: "Each level multiplies passive Starlight by about eleven percent.",
     baseCost: SciNum.fromNumber(55),
     growth: 1.152,
     tierReq: 1,
@@ -351,8 +351,8 @@ const UPGRADES = {
   },
   global_mult: {
     id: "global_mult",
-    name: "Universal Constant",
-    desc: "+4.5% all Energy / level — soft diminishing past level ~35 (infinite depth).",
+    name: "Meridian Core",
+    desc: "Each level multiplies every Starlight source—tap, passive, Pulse Choir.",
     baseCost: SciNum.fromNumber(240),
     growth: 1.175,
     tierReq: 2,
@@ -361,8 +361,8 @@ const UPGRADES = {
   },
   auto_pulses: {
     id: "auto_pulses",
-    name: "Pulse Automaton",
-    desc: "Auto pulses: 0.85 /s per level (scales with click power).",
+    name: "Pulse Choir",
+    desc: "Auto-taps per second; each tap pays your full Star Grip value.",
     baseCost: SciNum.fromNumber(750),
     growth: 1.235,
     tierReq: 3,
@@ -371,8 +371,8 @@ const UPGRADES = {
   },
   overclock: {
     id: "overclock",
-    name: "Temporal Overclock",
-    desc: "Passive tick efficiency — stronger early, diminishing past high levels.",
+    name: "Deep Cycle",
+    desc: "Each level multiplies passive Starlight delivered each game tick.",
     baseCost: SciNum.fromNumber(4200),
     growth: 1.255,
     tierReq: 4,
@@ -384,32 +384,32 @@ const UPGRADES = {
 const ESSENCE_UPGRADES = {
   everlight: {
     id: "everlight",
-    name: "Everlight",
-    desc: "Permanent +12% all Energy — your long-term backbone.",
+    name: "Perpetual Dawn",
+    desc: "Permanent twelve percent more Starlight from all sources.",
     baseCost: 1,
     growth: 1.48,
     reqAscensions: 0,
   },
   essence_gain: {
     id: "essence_gain",
-    name: "Returning Echo",
-    desc: "+10% Essence from each Ascension (stacking returns).",
+    name: "Louder Echo",
+    desc: "Each level multiplies Echo from every Ascend by ten percent.",
     baseCost: 2,
     growth: 1.58,
     reqAscensions: 1,
   },
   star_born: {
     id: "star_born",
-    name: "Star-Born Will",
-    desc: "+0.12 autoclick weight / level (scales pulses into deep runs).",
+    name: "Pulse Bond",
+    desc: "Each level adds twelve percent more Pulse Choir auto-taps per second.",
     baseCost: 4,
     growth: 1.62,
     reqAscensions: 2,
   },
   covenant: {
     id: "covenant",
-    name: "Covenant of Orders",
-    desc: "Order multipliers +3.5% stronger / level.",
+    name: "Sacred Order",
+    desc: "Strengthens Order tier bonus to Starlight by three point five percent per level.",
     baseCost: 10,
     growth: 1.78,
     reqAscensions: 4,
@@ -619,23 +619,23 @@ function pendingEssenceGain() {
 // =============================================================================
 
 const ACHIEVEMENTS = [
-  { id: "e1k", name: "Spark", test: () => SciNum.gte(state.totalEnergy, SciNum.fromNumber(1e3)) },
-  { id: "e1m", name: "Bonfire", test: () => SciNum.gte(state.totalEnergy, SciNum.fromNumber(1e6)) },
+  { id: "e1k", name: "First Light", test: () => SciNum.gte(state.totalEnergy, SciNum.fromNumber(1e3)) },
+  { id: "e1m", name: "Bright Ember", test: () => SciNum.gte(state.totalEnergy, SciNum.fromNumber(1e6)) },
   { id: "e1b", name: "Nova", test: () => SciNum.gte(state.totalEnergy, SciNum.fromNumber(1e9)) },
-  { id: "e1t", name: "Stellar River", test: () => SciNum.gte(state.totalEnergy, SciNum.fromNumber(1e12)) },
-  { id: "e1qa", name: "Galactic Drift", test: () => SciNum.gte(state.totalEnergy, SciNum.fromNumber(1e15)) },
-  { id: "e1qi", name: "Cosmic Tide", test: () => SciNum.gte(state.totalEnergy, SciNum.fromNumber(1e18)) },
-  { id: "order3", name: "Trinity Path", test: () => state.highestOrder >= 3 },
-  { id: "order6", name: "Hex Foundation", test: () => state.highestOrder >= 6 },
-  { id: "order10", name: "Decachord", test: () => state.highestOrder >= 10 },
+  { id: "e1t", name: "Star River", test: () => SciNum.gte(state.totalEnergy, SciNum.fromNumber(1e12)) },
+  { id: "e1qa", name: "Long Tide", test: () => SciNum.gte(state.totalEnergy, SciNum.fromNumber(1e15)) },
+  { id: "e1qi", name: "Deep Tide", test: () => SciNum.gte(state.totalEnergy, SciNum.fromNumber(1e18)) },
+  { id: "order3", name: "Third Order", test: () => state.highestOrder >= 3 },
+  { id: "order6", name: "Hex Star", test: () => state.highestOrder >= 6 },
+  { id: "order10", name: "Tenth Order", test: () => state.highestOrder >= 10 },
   { id: "asc1", name: "First Dawn", test: () => state.ascensions >= 1 },
-  { id: "asc5", name: "Many Returns", test: () => state.ascensions >= 5 },
-  { id: "asc15", name: "Fifteenth Sun", test: () => state.ascensions >= 15 },
-  { id: "asc40", name: "Architect of Cycles", test: () => state.ascensions >= 40 },
-  { id: "ess10", name: "Essence Hoard", test: () => state.essence >= 10 },
-  { id: "ess1k", name: "River of Light", test: () => state.essence >= 1000 },
-  { id: "auto", name: "Hands Free", test: () => (state.levels.auto_pulses || 0) >= 1 },
-  { id: "time1h", name: "Patient Star", test: () => state.playTimeMs >= 3600000 },
+  { id: "asc5", name: "Five Returns", test: () => state.ascensions >= 5 },
+  { id: "asc15", name: "Fifteenth Rise", test: () => state.ascensions >= 15 },
+  { id: "asc40", name: "Cycle Builder", test: () => state.ascensions >= 40 },
+  { id: "ess10", name: "Echo Cache", test: () => state.essence >= 10 },
+  { id: "ess1k", name: "Echo River", test: () => state.essence >= 1000 },
+  { id: "auto", name: "Pulse Begins", test: () => (state.levels.auto_pulses || 0) >= 1 },
+  { id: "time1h", name: "Slow Burn", test: () => state.playTimeMs >= 3600000 },
 ];
 
 function checkAchievements() {
@@ -942,9 +942,9 @@ function renderTopBar() {
     const m = getNewRunMomentum();
     if (m > 1.015) {
       momLine.hidden = false;
-      momLine.textContent = `Run momentum ×${m.toFixed(
+      momLine.textContent = `New-run surge ×${m.toFixed(
         2
-      )} (boosts click & passive — decays over ~12 min after Ascend)`;
+      )} (more Starlight from taps and passive; fades in ~12 min after Ascend)`;
     } else {
       momLine.hidden = true;
     }
@@ -983,8 +983,8 @@ function renderAutoClickerPanel() {
     controlsEl.hidden = false;
     const on = state.autoClickerActive;
     statusEl.textContent = on
-      ? `ON — +1 click every ${AUTO_CLICKER_INTERVAL_MS / 1000}s (uses current click power; works in background).`
-      : "OFF — auto-clicks are stopped.";
+      ? `ON — one full tap worth of Starlight every ${AUTO_CLICKER_INTERVAL_MS / 1000}s (works in background).`
+      : "OFF — timed taps are paused.";
     toggleBtn.textContent = on ? "Turn OFF" : "Turn ON";
     toggleBtn.setAttribute("aria-pressed", on ? "true" : "false");
     toggleBtn.classList.toggle("auto-clicker__toggle--on", on);
@@ -1002,7 +1002,7 @@ function renderAutoClickerPanel() {
     purchaseMeta.textContent = `One-time cost: ${formatSci(
       AUTO_CLICKER_COST,
       2
-    )} Energy.`;
+    )} Starlight.`;
     purchaseBtn.disabled = !SciNum.gte(state.energy, AUTO_CLICKER_COST);
   } else {
     lockedEl.hidden = false;
@@ -1121,12 +1121,12 @@ function renderMetaShop() {
     const meta = document.createElement("div");
     meta.className = "upgrade-card__meta";
     meta.textContent = locked
-      ? `Requires ${def.reqAscensions}+ Ascension(s)`
-      : `Cost: ${cost} Essence`;
+      ? `Needs ${def.reqAscensions}+ Ascends`
+      : `Cost: ${cost} Echo`;
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "btn btn--accent btn--buy";
-    btn.textContent = "Infuse";
+    btn.textContent = "Attune";
     btn.disabled = locked || state.essence < cost;
     btn.addEventListener("click", () => buyEssenceUpgrade(id));
     card.append(title, desc, meta, btn);
@@ -1145,25 +1145,25 @@ function renderOrderPanel() {
   btn.disabled = !SciNum.gte(state.energy, costSN);
   const hint = document.getElementById("order-advance-hint");
   hint.textContent = SciNum.gte(state.energy, costSN)
-    ? "Ready when you are — advancing raises tier multiplier but steepens the climb."
-    : `Need ${formatSci(costSN, 2)} Energy to advance.`;
+    ? "Ready — advancing raises Starlight multiplier and the next tier's Starlight price."
+    : `Need ${formatSci(costSN, 2)} Starlight to ascend this Order tier.`;
 }
 
 function renderAscendPanel() {
   const gainEl = document.getElementById("ascend-gain-text");
   const gain = pendingEssenceGain();
-  gainEl.innerHTML = `You would gain <strong>${gain}</strong> Essence.`;
+  gainEl.innerHTML = `You would gain <strong>${gain}</strong> Echo.`;
   const btn = document.getElementById("ascend-btn");
   const ok = canAscend();
   btn.disabled = !ok;
   const why = document.getElementById("ascend-block-reason");
   const need = getAscendRequirement();
   why.textContent = ok
-    ? "You meet this run’s Energy floor — Ascend to bank Essence and start a faster opening (new-run momentum)."
-    : `Current floor: ${formatSci(
+    ? "Ascend floor cleared — Ascend banks Echo and wakes a short new-run surge for Starlight."
+    : `Need ${formatSci(
         need,
         2
-      )} Energy. Rises with each Ascension so resets stay meaningful for days, not minutes.`;
+      )} Starlight to Ascend; the floor rises each time.`;
 }
 
 function renderStats() {
@@ -1171,19 +1171,19 @@ function renderStats() {
   if (!grid) return;
   grid.innerHTML = "";
   const rows = [
-    ["Total Energy (all time)", formatSci(state.totalEnergy, 2)],
+    ["Total Starlight (all time)", formatSci(state.totalEnergy, 2)],
     ["Ascensions", String(state.ascensions)],
-    ["Essence", String(state.essence)],
+    ["Echo banked", String(state.essence)],
     ["Highest Order reached", orderRoman(state.highestOrder)],
     ["Play time", `${(state.playTimeMs / 3600000).toFixed(2)} h`],
-    ["Energy this run", formatSci(state.runEnergy, 2)],
-    ["Peak Energy (this run)", formatSci(state.runPeak, 2)],
+    ["Starlight this run", formatSci(state.runEnergy, 2)],
+    ["Peak Starlight (this run)", formatSci(state.runPeak, 2)],
     [
       "Time this run",
-      `${(state.runTimeMs / 60000).toFixed(1)} min (momentum fades over ~10–12 min)`,
+      `${(state.runTimeMs / 60000).toFixed(1)} min (new-run surge fades ~10–12 min)`,
     ],
     [
-      "Order Auto-Clicker",
+      "Order Auto-Tap",
       state.autoClickerPurchased
         ? state.autoClickerActive
           ? `Owned — ON (${AUTO_CLICKER_INTERVAL_MS / 1000}s)`
@@ -1222,7 +1222,7 @@ function renderBars() {
   const fill = document.getElementById("order-progress-fill");
   const txt = document.getElementById("order-progress-text");
   if (fill) fill.style.width = `${(p * 100).toFixed(1)}%`;
-  if (txt) txt.textContent = `${formatSci(state.energy, 2)} / ${formatSci(oSnap, 2)} toward next Order`;
+  if (txt) txt.textContent = `${formatSci(state.energy, 2)} / ${formatSci(oSnap, 2)} Starlight toward next Order tier`;
 
   const needAsc = getAscendRequirement();
   const ap = canAscend()
@@ -1236,8 +1236,8 @@ function renderBars() {
   if (af) af.style.width = `${(ap * 100).toFixed(1)}%`;
   if (at)
     at.textContent = canAscend()
-      ? "Ascension available — see Ascend tab."
-      : `${(ap * 100).toFixed(0)}% toward Ascension gate`;
+      ? "Ascend ready — open the Ascend tab."
+      : `${(ap * 100).toFixed(0)}% of this run's Ascend Starlight gate`;
 }
 
 let shopDirty = true;
@@ -1376,9 +1376,9 @@ function showOfflineModal() {
   const dlg = document.getElementById("offline-modal");
   const txt = document.getElementById("offline-summary");
   const g = state.offlineGains;
-  txt.innerHTML = `Time simulated: <strong>${(g.seconds / 3600).toFixed(2)}</strong> hours (capped at 48h).<br/>
-    Estimated gain: <strong>${formatSci(g.amount, 2)}</strong> Energy<br/>
-    Based on current passive rate; upgrades apply now.`;
+  txt.innerHTML = `Time away: <strong>${(g.seconds / 3600).toFixed(2)}</strong> h (capped at 48h).<br/>
+    About <strong>${formatSci(g.amount, 2)}</strong> Starlight earned<br/>
+    From passive rate when you left; upgrades apply now.`;
   dlg.showModal();
 }
 

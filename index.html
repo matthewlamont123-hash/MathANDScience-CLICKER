@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Starlight Idle — Energy Ascension</title>
+  <title>Starlight Idle — Constellation Ascension</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div id="app" class="app" data-tier="1">
-    <!-- Floating +Energy numbers container -->
+    <!-- Floating +Starlight pickup numbers -->
     <div id="float-layer" class="float-layer" aria-hidden="true"></div>
 
     <!-- Offline summary -->
@@ -25,11 +25,11 @@
         <span class="brand__icon" aria-hidden="true">✡</span>
         <div>
           <div class="brand__name">Starlight Idle</div>
-          <div class="brand__tag">Order × Ascension × Time</div>
+          <div class="brand__tag">Gather Starlight · Climb Orders · Spend Echo</div>
         </div>
       </div>
-      <div class="resource-block">
-        <div class="resource-block__label">Energy</div>
+        <div class="resource-block">
+        <div class="resource-block__label">Starlight</div>
         <div id="energy-display" class="resource-block__value">0</div>
         <div class="resource-block__sub">
           <span id="eps-display">+0 /s</span>
@@ -39,8 +39,8 @@
         <div id="momentum-line" class="resource-block__mom" hidden></div>
       </div>
       <div class="meta-block">
-        <div class="meta-pill" title="Prestige currency from Ascending">
-          <span class="meta-pill__label">Essence</span>
+        <div class="meta-pill" title="Echo — prestige currency you keep after Ascending">
+          <span class="meta-pill__label">Echo</span>
           <span id="essence-display" class="meta-pill__value">0</span>
         </div>
         <div class="meta-pill">
@@ -55,7 +55,7 @@
       <button type="button" class="tab" data-tab="shop" role="tab">Shop</button>
       <button type="button" class="tab is-locked" data-tab="order" role="tab" aria-disabled="true" data-unlock-energy="1000">Order</button>
       <button type="button" class="tab is-locked" data-tab="ascend" role="tab" data-unlock-energy="50000">Ascend</button>
-      <button type="button" class="tab is-locked" data-tab="meta" role="tab" data-unlock-ascensions="1">Essence</button>
+      <button type="button" class="tab is-locked" data-tab="meta" role="tab" data-unlock-ascensions="1">Echo</button>
       <button type="button" class="tab" data-tab="stats" role="tab">Stats</button>
       <button type="button" class="tab is-locked" data-tab="achievements" role="tab" data-unlock-total-energy="10000">Achievements</button>
     </nav>
@@ -65,7 +65,7 @@
       <section id="panel-star" class="panel panel--active" data-panel="star" role="tabpanel">
         <div class="star-stage">
           <div class="star-stage__glow" id="star-glow"></div>
-          <button type="button" id="star-btn" class="star-btn" aria-label="Gather energy — Star of David">
+          <button type="button" id="star-btn" class="star-btn" aria-label="Gather Starlight">
             <svg class="star-btn__svg" viewBox="0 0 200 200" aria-hidden="true">
               <!-- Six-pointed star: two equilateral triangles -->
               <defs>
@@ -87,12 +87,12 @@
               </g>
             </svg>
           </button>
-          <div class="star-hint">Click the star to gather Energy. Passive income ticks every moment.</div>
+          <div class="star-hint">Tap the star for Starlight — passive Starlight fills in the background.</div>
           <aside
             id="xv-auto-teaser"
             class="xv-blob"
-            aria-label="Order XV unlocks Auto-Clicker"
-            title="Reach Order XV once to unlock the Auto-Clicker purchase"
+            aria-label="Order XV unlocks Order Auto-Tap"
+            title="Reach Order XV once to unlock a one-time Order Auto-Tap purchase"
           >
             <div class="xv-blob__disc" aria-hidden="true">
               <svg class="xv-blob__star" viewBox="0 0 32 32" focusable="false">
@@ -102,16 +102,19 @@
                 />
               </svg>
             </div>
-            <p class="xv-blob__txt"><em>Order XV</em> unlocks the Auto-Clicker</p>
+            <p class="xv-blob__txt"><em>Order XV</em> unlocks Order Auto-Tap</p>
           </aside>
-          <section id="auto-clicker-block" class="auto-clicker" aria-label="Order Auto-Clicker">
+          <section id="auto-clicker-block" class="auto-clicker" aria-label="Order Auto-Tap">
             <div id="auto-clicker-locked" class="auto-clicker__pane" hidden>
-              <strong class="auto-clicker__title">Order Auto-Clicker</strong>
-              <p class="auto-clicker__muted">Reach <strong>Order XV</strong> (15th Order) at least once in your save to unlock a one-time purchase. Ascending turns the auto-clicker <strong>OFF</strong> until you turn it on again.</p>
+              <strong class="auto-clicker__title">Order Auto-Tap</strong>
+              <p class="auto-clicker__muted">
+                Reach <strong>Order XV</strong> at least once in this save for a one-time Starlight purchase. Ascending switches Auto-Tap
+                <strong>OFF</strong> until you turn it on again.
+              </p>
             </div>
             <div id="auto-clicker-buy" class="auto-clicker__pane auto-clicker__row" hidden>
               <div>
-                <strong class="auto-clicker__title">Order Auto-Clicker</strong>
+                <strong class="auto-clicker__title">Order Auto-Tap</strong>
                 <p id="auto-clicker-purchase-meta" class="auto-clicker__muted"></p>
               </div>
               <button type="button" class="btn btn--accent" id="auto-clicker-purchase-btn">Purchase</button>
@@ -123,14 +126,14 @@
           </section>
           <div class="bars">
             <div class="bar">
-              <div class="bar__label">Next Order milestone</div>
+              <div class="bar__label">Next Order — Starlight cost</div>
               <div class="bar__track">
                 <div class="bar__fill" id="order-progress-fill"></div>
               </div>
               <div class="bar__cap" id="order-progress-text">—</div>
             </div>
             <div class="bar">
-              <div class="bar__label">Ascension readiness (this run)</div>
+              <div class="bar__label">Ascend — Starlight gate (this run)</div>
               <div class="bar__track">
                 <div class="bar__fill bar__fill--ascend" id="ascend-preview-fill"></div>
               </div>
@@ -143,13 +146,13 @@
       <!-- SHOP TAB -->
       <section id="panel-shop" class="panel" data-panel="shop" role="tabpanel" hidden>
         <div class="panel__head">
-          <h2>Upgrades</h2>
-          <p class="panel__sub">Costs scale exponentially. Higher Order unlocks stronger rows.</p>
+          <h2>Bright Lattice</h2>
+          <p class="panel__sub">Spend Starlight. Higher Orders open stronger lattice tiers below.</p>
         </div>
         <div id="shop-basic" class="upgrade-grid"></div>
         <div class="panel__head panel__head--spaced">
-          <h2>Advanced</h2>
-          <p class="panel__sub">Global power, automations — unlock with Order level.</p>
+          <h2>Higher Halo</h2>
+          <p class="panel__sub">Advanced constellation tech — unlocks as you climb Orders.</p>
         </div>
         <div id="shop-advanced" class="upgrade-grid"></div>
       </section>
@@ -157,8 +160,8 @@
       <!-- ORDER TAB -->
       <section id="panel-order" class="panel" data-panel="order" role="tabpanel" hidden>
         <div class="panel__head">
-          <h2>Order Levels</h2>
-          <p class="panel__sub">Each Order raises baseline multipliers but makes the next tier slower. Visual theme updates per tier.</p>
+          <h2>Orders of Light</h2>
+          <p class="panel__sub">Spend Starlight on the next Order — every tier widens your constellation multiplier.</p>
         </div>
         <div class="order-card">
           <div class="order-card__row">
@@ -166,14 +169,14 @@
             <strong id="order-detail-tier">I</strong>
           </div>
           <div class="order-card__row">
-            <span>Tier multiplier (clicks &amp; passive)</span>
+            <span>Boost from your Order tier</span>
             <strong id="order-detail-mult">×1.00</strong>
           </div>
           <div class="order-card__row">
-            <span>Next tier requirement</span>
+            <span>Next tier Starlight cost</span>
             <strong id="order-detail-req">—</strong>
           </div>
-          <button type="button" class="btn btn--accent" id="order-advance-btn">Advance Order (costs Energy)</button>
+          <button type="button" class="btn btn--accent" id="order-advance-btn">Raise Order tier (costs Starlight)</button>
           <p class="fineprint" id="order-advance-hint"></p>
         </div>
       </section>
@@ -183,16 +186,16 @@
         <div class="panel__head">
           <h2>Ascension</h2>
           <p class="panel__sub">
-            Ascend to reset your run and bank Essence. The Energy floor for Ascending rises with each completion — there’s always a next hill to climb.
+            Ascend resets this run yet banks <strong>Echo</strong>. Each Ascend sets a higher Starlight floor so every reset stays a climb worth taking.
           </p>
         </div>
         <div class="ascend-card">
-          <p id="ascend-gain-text" class="ascend-card__gain">You would gain <strong>0</strong> Essence.</p>
+          <p id="ascend-gain-text" class="ascend-card__gain">You would gain <strong>0</strong> Echo.</p>
           <ul class="ascend-list">
-            <li>Resets Energy, Order level, and all Energy-purchased upgrades.</li>
-            <li>Keeps Essence, Essence shop levels, achievements, and lifetime stats.</li>
-            <li>New runs open with a burst of “momentum” production — ideal for active play sessions.</li>
-            <li>Essence scales with current Energy, Order, and total lifetime Energy — no hard completion state.</li>
+            <li>Reset: Starlight, Order tier, lattice upgrades — everything purchased with Starlight.</li>
+            <li>Keeps: Echo, Echo attunements, achievements, totals, and milestones.</li>
+            <li>Fresh starts get a burst of surge production best for hands-on pushes.</li>
+            <li>Echo payout scales from reached Starlight, Order tier, and lifetime Starlight — climb without a hard finale.</li>
           </ul>
           <button type="button" class="btn btn--danger" id="ascend-btn" disabled>Ascend</button>
           <p id="ascend-block-reason" class="fineprint"></p>
@@ -202,8 +205,10 @@
       <!-- ESSENCE / META TAB -->
       <section id="panel-meta" class="panel" data-panel="meta" role="tabpanel" hidden>
         <div class="panel__head">
-          <h2>Essence Upgrades</h2>
-          <p class="panel__sub">Permanent power — costs Essence from Ascension. New rows unlock as you Ascend more.</p>
+          <h2>Echo Works</h2>
+          <p class="panel__sub">
+            Forge permanent constellation bonuses with Echo gathered from Ascensions — louder rows awaken after more resets.
+          </p>
         </div>
         <div id="shop-meta" class="upgrade-grid"></div>
       </section>
@@ -220,7 +225,7 @@
       <section id="panel-achievements" class="panel" data-panel="achievements" role="tabpanel" hidden>
         <div class="panel__head">
           <h2>Achievements</h2>
-          <p class="panel__sub">Milestone rewards are informational; the real reward is progression knowledge.</p>
+          <p class="panel__sub">Constellation benchmarks — checkpoints on the long ascent.</p>
         </div>
         <div id="achievements-list" class="achievements-list"></div>
       </section>
