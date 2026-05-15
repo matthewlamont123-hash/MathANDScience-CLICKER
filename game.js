@@ -249,7 +249,7 @@ const OFFLINE_CAP_S = 48 * 3600;
 /** Minimum saved format we still migrate from */
 const MIN_SAVE_VERSION = 3;
 
-/** Unlock purchase at current run Order ≥ this value */
+/** Unlock purchase once lifetime highest Order reaches this tier */
 const AUTO_CLICKER_ORDER_REQUIREMENT = 15;
 /** One pulse per interval = one manual click worth of Energy */
 const AUTO_CLICKER_INTERVAL_MS = 1000;
@@ -453,9 +453,9 @@ const state = {
   /** Resets on Ascend — powers getNewRunMomentum() for snappy early run */
   runTimeMs: 0,
 
-  /** One-time buy once current Order ≥ XV; persists across Ascension */
+  /** One-time buy after highest Order ever ≥ XV; persists across Ascension */
   autoClickerPurchased: false,
-  /** User-controlled; survives Ascension */
+  /** User-controlled (reset OFF on Ascend) */
   autoClickerActive: false,
 };
 
@@ -750,12 +750,14 @@ function ascend() {
   state.runTimeMs = 0;
   for (const k of Object.keys(state.levels)) state.levels[k] = 0;
 
+  state.autoClickerActive = false;
   saveDirty = true;
   checkAchievements();
+  syncAutoClickerIntervalFromState();
 }
 
 // =============================================================================
-// Order Auto-Clicker — purchase at Order XV, setInterval tick (never stacked)
+// Order Auto-Clicker — unlock by highest Order ever XV; setInterval (never stacked)
 // =============================================================================
 
 let autoClickerTimerId = null;
@@ -786,7 +788,7 @@ function syncAutoClickerIntervalFromState() {
 
 function purchaseAutoClicker() {
   if (state.autoClickerPurchased) return;
-  if (state.order < AUTO_CLICKER_ORDER_REQUIREMENT) return;
+  if (state.highestOrder < AUTO_CLICKER_ORDER_REQUIREMENT) return;
   if (!SciNum.gte(state.energy, AUTO_CLICKER_COST)) return;
   if (!spendEnergy(AUTO_CLICKER_COST)) return;
   state.autoClickerPurchased = true;
@@ -972,7 +974,7 @@ function renderAutoClickerPanel() {
   }
 
   const purchased = state.autoClickerPurchased;
-  const canBuyNow = state.order >= AUTO_CLICKER_ORDER_REQUIREMENT;
+  const canBuyNow = state.highestOrder >= AUTO_CLICKER_ORDER_REQUIREMENT;
 
   if (purchased) {
     lockedEl.hidden = true;
