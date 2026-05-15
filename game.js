@@ -663,10 +663,13 @@ function onStarClick(event) {
   checkAchievements();
   spawnFloatText(event, `+${formatSci(epc, 2)}`);
   pulseStar();
+  renderTopBar();
+  renderBars();
 }
 
 function pulseStar() {
   const btn = document.getElementById("star-btn");
+  if (!btn) return;
   btn.classList.remove("star-btn--pop");
   void btn.offsetWidth;
   btn.classList.add("star-btn--pop");
@@ -909,10 +912,10 @@ function renderShop() {
     btn.className = "btn btn--primary btn--buy";
     btn.textContent = "Buy";
     btn.disabled = state.order < def.tierReq || !canAffordUpgrade(id);
-    btn.button.addEventListener("click", (e) => {
-      e.stopPropagation(); // 🚫 THIS is the fix
-      purchaseUpgrade(id);
-  });
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      buyUpgrade(id);
+    });
     wrap.append(title, desc, meta, btn);
     (def.type === "basic" ? basic : adv).appendChild(wrap);
   }
@@ -1149,29 +1152,33 @@ function tickGame(dtMs) {
 }
 
 function frame(now) {
-  const dt = Math.min(250, now - lastFrame);
-  lastFrame = now;
-  acc += dt;
-  while (acc >= TICK_MS) {
-    tickGame(TICK_MS);
-    acc -= TICK_MS;
-  }
+  try {
+    const dt = Math.min(250, now - lastFrame);
+    lastFrame = now;
+    acc += dt;
+    while (acc >= TICK_MS) {
+      tickGame(TICK_MS);
+      acc -= TICK_MS;
+    }
 
-  renderTopBar();
-  renderBars();
-  renderUnlockTabs();
-  if (shopDirty) {
-    renderShop();
-    renderMetaShop();
-    shopDirty = false;
+    renderTopBar();
+    renderBars();
+    renderUnlockTabs();
+    if (shopDirty) {
+      renderShop();
+      renderMetaShop();
+      shopDirty = false;
+    }
+    if (achDirty) {
+      renderAchievements();
+      achDirty = false;
+    }
+    renderOrderPanel();
+    renderAscendPanel();
+    renderStats();
+  } catch (err) {
+    console.error("[Starlight Idle] frame:", err);
   }
-  if (achDirty) {
-    renderAchievements();
-    achDirty = false;
-  }
-  renderOrderPanel();
-  renderAscendPanel();
-  renderStats();
 
   requestAnimationFrame(frame);
 }
