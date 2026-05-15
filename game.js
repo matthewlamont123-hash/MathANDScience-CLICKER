@@ -952,6 +952,7 @@ function renderTopBar() {
 }
 
 function renderAutoClickerPanel() {
+  const xvTeaser = document.getElementById("xv-auto-teaser");
   const block = document.getElementById("auto-clicker-block");
   const lockedEl = document.getElementById("auto-clicker-locked");
   const buyEl = document.getElementById("auto-clicker-buy");
@@ -987,8 +988,11 @@ function renderAutoClickerPanel() {
     toggleBtn.textContent = on ? "Turn OFF" : "Turn ON";
     toggleBtn.setAttribute("aria-pressed", on ? "true" : "false");
     toggleBtn.classList.toggle("auto-clicker__toggle--on", on);
+    if (xvTeaser) xvTeaser.hidden = true;
     return;
   }
+
+  if (xvTeaser) xvTeaser.hidden = false;
 
   controlsEl.hidden = true;
 
