@@ -243,9 +243,18 @@ function formatSci(x, decimals = 2) {
 // Game configuration — balance knobs
 // =============================================================================
 
-const SAVE_VERSION = 3;
+const SAVE_VERSION = 4;
 const TICK_MS = 100;
 const OFFLINE_CAP_S = 48 * 3600;
+/** Minimum saved format we still migrate from */
+const MIN_SAVE_VERSION = 3;
+
+/** Unlock purchase at current run Order ≥ this value */
+const AUTO_CLICKER_ORDER_REQUIREMENT = 15;
+/** One pulse per interval = one manual click worth of Energy */
+const AUTO_CLICKER_INTERVAL_MS = 1000;
+/** One-time purchase cost */
+const AUTO_CLICKER_COST = SciNum.fromNumber(5e17);
 /** First Ascension gate (~1e6); after that use getAscendRequirement() */
 const ASCEND_FIRST_LOG = 6;
 const ORDER_ROMAN = [
@@ -261,6 +270,9 @@ const ORDER_ROMAN = [
   "X",
   "XI",
   "XII",
+  "XIII",
+  "XIV",
+  "XV",
 ];
 
 function orderRoman(n) {
@@ -440,6 +452,11 @@ const state = {
   playTimeMs: 0,
   /** Resets on Ascend — powers getNewRunMomentum() for snappy early run */
   runTimeMs: 0,
+
+  /** One-time buy once current Order ≥ XV; persists across Ascension */
+  autoClickerPurchased: false,
+  /** User-controlled; survives Ascension */
+  autoClickerActive: false,
 };
 
 // Autosave / dirty flag
@@ -738,6 +755,59 @@ function ascend() {
 }
 
 // =============================================================================
+// Order Auto-Clicker — purchase at Order XV, setInterval tick (never stacked)
+// =============================================================================
+
+let autoClickerTimerId = null;
+
+function stopAutoClickerInterval() {
+  if (autoClickerTimerId !== null) {
+    clearInterval(autoClickerTimerId);
+    autoClickerTimerId = null;
+  }
+}
+
+function tickAutoClicker() {
+  if (!state.autoClickerPurchased || !state.autoClickerActive) return;
+  const epc = energyPerClick();
+  if (SciNum.gt(epc, SciNum.ZERO)) {
+    addEnergy(epc);
+    checkAchievements();
+  }
+}
+
+/** Clears any prior timer, then starts at most one interval if purchased & active */
+function syncAutoClickerIntervalFromState() {
+  stopAutoClickerInterval();
+  if (state.autoClickerPurchased && state.autoClickerActive) {
+    autoClickerTimerId = setInterval(tickAutoClicker, AUTO_CLICKER_INTERVAL_MS);
+  }
+}
+
+function purchaseAutoClicker() {
+  if (state.autoClickerPurchased) return;
+  if (state.order < AUTO_CLICKER_ORDER_REQUIREMENT) return;
+  if (!SciNum.gte(state.energy, AUTO_CLICKER_COST)) return;
+  if (!spendEnergy(AUTO_CLICKER_COST)) return;
+  state.autoClickerPurchased = true;
+  saveDirty = true;
+}
+
+function setAutoClickerActive(on) {
+  if (!state.autoClickerPurchased) return;
+  const next = !!on;
+  if (state.autoClickerActive !== next) {
+    state.autoClickerActive = next;
+    saveDirty = true;
+  }
+  syncAutoClickerIntervalFromState();
+}
+
+function toggleAutoClicker() {
+  setAutoClickerActive(!state.autoClickerActive);
+}
+
+// =============================================================================
 // Persistence
 // =============================================================================
 
@@ -760,13 +830,15 @@ function serialize() {
     lastSave: Date.now(),
     playTimeMs: state.playTimeMs,
     runTimeMs: state.runTimeMs,
+    autoClickerPurchased: state.autoClickerPurchased,
+    autoClickerActive: state.autoClickerActive,
   });
 }
 
 function deserialize(str) {
   try {
     const raw = JSON.parse(str);
-    if (!raw || raw.v !== SAVE_VERSION) return false;
+    if (!raw || raw.v < MIN_SAVE_VERSION || raw.v > SAVE_VERSION) return false;
     state.energy = SciNum.fromSerialized(raw.energy);
     state.totalEnergy = SciNum.fromSerialized(raw.totalEnergy);
     state.runEnergy = SciNum.fromSerialized(raw.runEnergy);
@@ -781,6 +853,8 @@ function deserialize(str) {
     state.lastSave = raw.lastSave || Date.now();
     state.playTimeMs = raw.playTimeMs | 0;
     state.runTimeMs = raw.runTimeMs | 0;
+    state.autoClickerPurchased = Boolean(raw.autoClickerPurchased);
+    state.autoClickerActive = Boolean(raw.autoClickerActive);
     return true;
   } catch {
     return false;
@@ -872,6 +946,61 @@ function renderTopBar() {
     } else {
       momLine.hidden = true;
     }
+  }
+}
+
+function renderAutoClickerPanel() {
+  const block = document.getElementById("auto-clicker-block");
+  const lockedEl = document.getElementById("auto-clicker-locked");
+  const buyEl = document.getElementById("auto-clicker-buy");
+  const controlsEl = document.getElementById("auto-clicker-controls");
+  const statusEl = document.getElementById("auto-clicker-status");
+  const toggleBtn = document.getElementById("auto-clicker-toggle");
+  const purchaseBtn = document.getElementById("auto-clicker-purchase-btn");
+  const purchaseMeta = document.getElementById("auto-clicker-purchase-meta");
+  if (
+    !block ||
+    !lockedEl ||
+    !buyEl ||
+    !controlsEl ||
+    !statusEl ||
+    !toggleBtn ||
+    !purchaseBtn ||
+    !purchaseMeta
+  ) {
+    return;
+  }
+
+  const purchased = state.autoClickerPurchased;
+  const canBuyNow = state.order >= AUTO_CLICKER_ORDER_REQUIREMENT;
+
+  if (purchased) {
+    lockedEl.hidden = true;
+    buyEl.hidden = true;
+    controlsEl.hidden = false;
+    const on = state.autoClickerActive;
+    statusEl.textContent = on
+      ? `ON — +1 click every ${AUTO_CLICKER_INTERVAL_MS / 1000}s (uses current click power; works in background).`
+      : "OFF — auto-clicks are stopped.";
+    toggleBtn.textContent = on ? "Turn OFF" : "Turn ON";
+    toggleBtn.setAttribute("aria-pressed", on ? "true" : "false");
+    toggleBtn.classList.toggle("auto-clicker__toggle--on", on);
+    return;
+  }
+
+  controlsEl.hidden = true;
+
+  if (canBuyNow) {
+    lockedEl.hidden = true;
+    buyEl.hidden = false;
+    purchaseMeta.textContent = `One-time cost: ${formatSci(
+      AUTO_CLICKER_COST,
+      2
+    )} Energy.`;
+    purchaseBtn.disabled = !SciNum.gte(state.energy, AUTO_CLICKER_COST);
+  } else {
+    lockedEl.hidden = false;
+    buyEl.hidden = true;
   }
 }
 
@@ -1047,6 +1176,14 @@ function renderStats() {
       "Time this run",
       `${(state.runTimeMs / 60000).toFixed(1)} min (momentum fades over ~10–12 min)`,
     ],
+    [
+      "Order Auto-Clicker",
+      state.autoClickerPurchased
+        ? state.autoClickerActive
+          ? `Owned — ON (${AUTO_CLICKER_INTERVAL_MS / 1000}s)`
+          : "Owned — OFF"
+        : "Not purchased",
+    ],
   ];
   for (const [k, v] of rows) {
     const box = document.createElement("div");
@@ -1202,6 +1339,7 @@ function frame(now) {
 
     renderTopBar();
     renderBars();
+    renderAutoClickerPanel();
     renderUnlockTabs();
     if (shopDirty) {
       renderShop();
@@ -1255,6 +1393,15 @@ function bindUi() {
     renderFullShopAndPanels();
   });
 
+  document.getElementById("auto-clicker-purchase-btn").addEventListener("click", () => {
+    purchaseAutoClicker();
+    renderAutoClickerPanel();
+  });
+  document.getElementById("auto-clicker-toggle").addEventListener("click", () => {
+    toggleAutoClicker();
+    renderAutoClickerPanel();
+  });
+
   // Periodic autosave
   setInterval(() => {
     saveDirty = true;
@@ -1277,7 +1424,10 @@ function boot() {
   bindUi();
   setupTabs();
 
+  syncAutoClickerIntervalFromState();
+
   renderTopBar();
+  renderAutoClickerPanel();
   renderFullShopAndPanels();
   requestAnimationFrame(frame);
 
@@ -1285,15 +1435,3 @@ function boot() {
 }
 
 boot();
-// 🔥 DEBUG TOOL (put at top of file)
-window._shopDirty = true;
-
-Object.defineProperty(window, "shopDirty", {
-  set(value) {
-    console.trace("shopDirty set to:", value);
-    this._shopDirty = value;
-  },
-  get() {
-    return this._shopDirty;
-  }
-});

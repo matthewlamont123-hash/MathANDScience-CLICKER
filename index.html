@@ -88,6 +88,23 @@
             </svg>
           </button>
           <div class="star-hint">Click the star to gather Energy. Passive income ticks every moment.</div>
+          <section id="auto-clicker-block" class="auto-clicker" aria-label="Order Auto-Clicker">
+            <div id="auto-clicker-locked" class="auto-clicker__pane" hidden>
+              <strong class="auto-clicker__title">Order Auto-Clicker</strong>
+              <p class="auto-clicker__muted">Reach <strong>Order XV</strong> (15th Order) on this run to unlock a one-time purchase. Runs globally every second while ON.</p>
+            </div>
+            <div id="auto-clicker-buy" class="auto-clicker__pane auto-clicker__row" hidden>
+              <div>
+                <strong class="auto-clicker__title">Order Auto-Clicker</strong>
+                <p id="auto-clicker-purchase-meta" class="auto-clicker__muted"></p>
+              </div>
+              <button type="button" class="btn btn--accent" id="auto-clicker-purchase-btn">Purchase</button>
+            </div>
+            <div id="auto-clicker-controls" class="auto-clicker__pane auto-clicker__row" hidden>
+              <p id="auto-clicker-status" class="auto-clicker__status" role="status"></p>
+              <button type="button" class="btn btn--primary auto-clicker__toggle" id="auto-clicker-toggle" aria-pressed="false">Turn ON</button>
+            </div>
+          </section>
           <div class="bars">
             <div class="bar">
               <div class="bar__label">Next Order milestone</div>
