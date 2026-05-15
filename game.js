@@ -939,16 +939,23 @@ function refreshEnergyShopCards() {
 
       const tierOk = state.order >= def.tierReq;
       const afford = canAffordUpgrade(id);
-      wrap.classList.toggle("is-locked", !tierOk);
-      wrap.classList.toggle("is-disabled", !afford);
-      const btn = wrap.querySelector("button.btn--buy");
-      if (btn) btn.disabled = !tierOk || !afford;
-      const meta = wrap.querySelector(".upgrade-card__meta");
-      if (meta) {
-        meta.textContent = !tierOk
-          ? `Unlock at Order ${orderRoman(def.tierReq)}`
-          : `Cost: ${formatSci(upgradeCostFixed(id), 2)}`;
+      const locked = !tierOk;
+      const disabled = !tierOk || !afford;
+      const metaStr = !tierOk
+        ? `Unlock at Order ${orderRoman(def.tierReq)}`
+        : `Cost: ${formatSci(upgradeCostFixed(id), 2)}`;
+
+      if (locked !== wrap.classList.contains("is-locked")) {
+        wrap.classList.toggle("is-locked", locked);
       }
+      if (wrap.classList.contains("is-disabled") !== !afford) {
+        wrap.classList.toggle("is-disabled", !afford);
+      }
+      const btn = wrap.querySelector("button.btn--buy");
+      if (btn && btn.disabled !== disabled) btn.disabled = disabled;
+
+      const meta = wrap.querySelector(".upgrade-card__meta");
+      if (meta && meta.textContent !== metaStr) meta.textContent = metaStr;
     }
   }
 }
